@@ -12,7 +12,7 @@ class HealthHandler(BaseHTTPRequestHandler):
         self.wfile.write(b"Bot is Healthy")
 
 def run_health_server():
-    # Koyeb passes a port number in the 'PORT' environment variable
+    # Koyeb provides the port in the 'PORT' environment variable
     port = int(os.environ.get("PORT", 8080))
     server = HTTPServer(('0.0.0.0', port), HealthHandler)
     server.serve_forever()

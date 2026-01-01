@@ -4,7 +4,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-# --- KOYEB HEALTH CHECK SERVER ---
+# --- DUMMY SERVER FOR KOYEB HEALTH CHECKS ---
 class HealthHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -12,7 +12,7 @@ class HealthHandler(BaseHTTPRequestHandler):
         self.wfile.write(b"Bot is Healthy")
 
 def run_health_server():
-    # Koyeb provides the port in an environment variable
+    # Koyeb passes a port number in the 'PORT' environment variable
     port = int(os.environ.get("PORT", 8080))
     server = HTTPServer(('0.0.0.0', port), HealthHandler)
     server.serve_forever()
@@ -21,13 +21,14 @@ def run_health_server():
 TOKEN = os.environ.get('TOKEN')
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 Bot is live on Koyeb!")
+    await update.message.reply_text("👋 Hello! Bot is live on Koyeb.")
 
 if __name__ == '__main__':
-    # Start the health server in the background
+    # Start the health check server in a separate thread
     threading.Thread(target=run_health_server, daemon=True).start()
     
     # Start the Telegram Bot
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
+    print("Bot is starting...")
     app.run_polling()

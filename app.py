@@ -24,7 +24,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("👋 Hello! Bot is live on Koyeb.")
 
 if __name__ == '__main__':
-    # Start the health check server in a separate thread
+    # Start the health check server in a separate thread so Koyeb stays happy
     threading.Thread(target=run_health_server, daemon=True).start()
     
     # Start the Telegram Bot

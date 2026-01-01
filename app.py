@@ -1,40 +1,33 @@
 import os
-import asyncio
-import yt_dlp
-from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-# 1. SIMPLE WEB SERVER FOR KOYEB HEALTH CHECKS
-class HealthCheckHandler(BaseHTTPRequestHandler):
+# --- KOYEB HEALTH CHECK SERVER ---
+class HealthHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"Bot is Alive")
+        self.wfile.write(b"Bot is Healthy")
 
 def run_health_server():
+    # Koyeb provides the port in an environment variable
     port = int(os.environ.get("PORT", 8080))
-    server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
+    server = HTTPServer(('0.0.0.0', port), HealthHandler)
     server.serve_forever()
 
-# 2. YOUR BOT LOGIC
+# --- YOUR BOT LOGIC ---
 TOKEN = os.environ.get('TOKEN')
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("👋 Send me a link to download!")
-
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    url = update.message.text
-    # ... (Keep your yt-dlp download logic here) ...
-    await update.message.reply_text(f"Processing: {url}")
+    await update.message.reply_text("👋 Bot is live on Koyeb!")
 
 if __name__ == '__main__':
-    # Start health check in a separate thread so Koyeb is happy
+    # Start the health server in the background
     threading.Thread(target=run_health_server, daemon=True).start()
     
-    # Start Telegram Bot
+    # Start the Telegram Bot
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     app.run_polling()
